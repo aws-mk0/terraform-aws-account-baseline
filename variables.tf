@@ -9,9 +9,9 @@ variable "iam_minimum_password_length" {
 }
 
 variable "iam_max_password_age" {
-  description = "Maximum age in days before passwords must be rotated"
+  description = "Maximum age in days before passwords must be rotated (0 = never expire)"
   type        = number
-  default     = 90
+  default     = 0
 }
 
 variable "iam_password_reuse_prevention" {

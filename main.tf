@@ -1,7 +1,8 @@
 ###############################################################################
 # IAM Account Password Policy
-# Enforces strong password requirements for IAM users.
-# Aligned with CIS AWS Foundations Benchmark.
+# Strong password requirements for IAM users (defense-in-depth).
+# Primary access is via SSO — IAM users should be rare/blocked by SCP.
+# Passwords never expire (NIST 800-63B). MFA enforced via SCP at OU level.
 ###############################################################################
 
 resource "aws_iam_account_password_policy" "strict" {
@@ -14,6 +15,17 @@ resource "aws_iam_account_password_policy" "strict" {
   max_password_age               = var.iam_max_password_age
   password_reuse_prevention      = var.iam_password_reuse_prevention
   hard_expiry                    = false
+}
+
+###############################################################################
+# IMDSv2 Enforcement
+# Require IMDSv2 (token-based) for all EC2 instances in this account.
+# Prevents SSRF attacks from accessing instance metadata.
+###############################################################################
+
+resource "aws_ec2_instance_metadata_defaults" "imdsv2" {
+  http_tokens                 = "required"
+  http_put_response_hop_limit = 2
 }
 
 ###############################################################################
