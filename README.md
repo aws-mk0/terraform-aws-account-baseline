@@ -11,7 +11,8 @@ aft-global-customizations
     │
     └── calls this module
             │
-            ├── IAM password policy (CIS-aligned)
+            ├── IAM password policy (NIST 800-63B, never-expire)
+            ├── IMDSv2 enforcement (account-wide)
             ├── Account-level S3 public access block
             └── Default EBS encryption
 ```
@@ -20,7 +21,8 @@ aft-global-customizations
 
 | Resource | What | Key Settings |
 |---|---|---|
-| `aws_iam_account_password_policy` | Enforces strong passwords for IAM users | 14 char min, uppercase + lowercase + numbers + symbols required, 90-day rotation, 24 password reuse prevention |
+| `aws_iam_account_password_policy` | Enforces strong passwords for IAM users | 14 char min, uppercase + lowercase + numbers + symbols required, **passwords never expire** (NIST 800-63B), 24 password reuse prevention |
+| `aws_ec2_instance_metadata_defaults` | Enforces IMDSv2 across all EC2 instances in the account | `http_tokens = required`, hop limit 2 — prevents SSRF-based metadata credential theft |
 | `aws_s3_account_public_access_block` | Prevents any S3 bucket from being made public | All 4 block settings enabled (block public ACLs, block public policy, ignore public ACLs, restrict public buckets) |
 | `aws_ebs_encryption_by_default` | Encrypts all new EBS volumes automatically | Uses AWS-managed key |
 
@@ -36,11 +38,11 @@ Reference this module from `aft-global-customizations/terraform/main.tf`:
 
 ```hcl
 module "account_baseline" {
-  source = "github.com/aws-mk0/terraform-aws-account-baseline?ref=v1.0.0"
+  source = "github.com/aws-mk0/terraform-aws-account-baseline?ref=v1.1.0"
 }
 ```
 
-Always pin to a specific version tag (`?ref=v1.0.0`). Never reference `main` directly.
+Always pin to a specific version tag (`?ref=v1.1.0`). Never reference `main` directly.
 
 ### Input Variables
 
@@ -49,7 +51,7 @@ All variables have sensible defaults. Override only if needed:
 | Variable | Type | Default | Description |
 |---|---|---|---|
 | `iam_minimum_password_length` | number | `14` | Minimum IAM password length |
-| `iam_max_password_age` | number | `90` | Days before password rotation required |
+| `iam_max_password_age` | number | `0` | Days before password rotation required (0 = never expire, per NIST 800-63B) |
 | `iam_password_reuse_prevention` | number | `24` | Number of previous passwords blocked |
 | `enable_s3_public_access_block` | bool | `true` | Enable account-level S3 public access block |
 | `enable_ebs_default_encryption` | bool | `true` | Enable default EBS volume encryption |
@@ -69,13 +71,13 @@ terraform-aws-account-baseline/
 ├── main.tf          # Resource definitions (IAM policy, S3 block, EBS encryption)
 ├── variables.tf     # Input variables with defaults
 ├── outputs.tf       # Output values
-├── versions.tf      # Terraform >= 1.5.0, AWS provider >= 5.0
+├── versions.tf      # Terraform >= 1.5.0, AWS provider >= 5.37
 └── README.md
 ```
 
 ## Versioning
 
-This module uses **git tags** for versioning (e.g., `v1.0.0`). When making changes:
+Current version: **v1.1.0**. This module uses **git tags** for versioning. When making changes:
 
 1. Edit the module code
 2. Commit and push to `main`

@@ -9,7 +9,7 @@ This is a **shared Terraform module** that defines the standard AWS account base
 ```
 aft-global-customizations
   └── module "account_baseline" {
-        source = "github.com/aws-mk0/terraform-aws-account-baseline?ref=v1.0.0"
+        source = "github.com/aws-mk0/terraform-aws-account-baseline?ref=v1.1.0"
       }
         → Applied to every AFT-managed account
 ```
@@ -30,15 +30,16 @@ Standard Terraform module layout:
 
 ## What This Module Covers
 
-- **Mandatory tags** via `default_tags` provider configuration
-- **IAM password policy** enforcement
+- **IAM password policy** enforcement (never-expire passwords per NIST 800-63B, strong complexity requirements)
+- **IMDSv2 enforcement** via `aws_ec2_instance_metadata_defaults` (prevents SSRF-based metadata credential theft)
 - **S3 public access block** at the account level
-- **Security defaults** (baseline hardening)
+- **Default EBS encryption** (all new volumes encrypted automatically)
 
 ## Versioning
 
-- Versioned via **git tags** (e.g., `v1.0.0`)
-- Consumers reference specific versions: `?ref=v1.0.0`
+- Current version: **v1.1.0**
+- Versioned via **git tags** (e.g., `v1.1.0`)
+- Consumers reference specific versions: `?ref=v1.1.0`
 - Follow semantic versioning: breaking changes = major bump, new features = minor, fixes = patch
 - Always tag a release after merging changes to `main`
 
