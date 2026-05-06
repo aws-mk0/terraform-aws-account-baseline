@@ -63,3 +63,10 @@ This module is currently sourced directly from GitHub. It will eventually migrat
 - All variables should have descriptions and sensible defaults where appropriate
 - All outputs should have descriptions
 - Keep the module focused — only account-level baseline concerns belong here
+- **ASCII-safe text in AWS resource fields.** AWS IAM and several other AWS APIs reject characters outside `[	
+ -~¡-ÿ]` (tab/LF/CR + ASCII printable + Latin-1 Supplement) in `description`, tag values, IAM resource names, and similar free-text fields. Common culprits to avoid:
+  - Em dash `—` (U+2014) → use ASCII hyphen `-`
+  - En dash `–` (U+2013) → use ASCII hyphen `-`
+  - Curly quotes `"` `"` `'` `'` → use straight `"` `'`
+  - Ellipsis `…` → use three dots `...`
+  - Watch out for: AI-generated text, copy-paste from rendered markdown, Obsidian auto-typography. Failure mode is `ValidationError` at apply time, not plan.
